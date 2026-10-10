@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web2APK Builder</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#080d1c;color:white;font-family:Arial,sans-serif}
+main{max-width:600px;margin:35px auto}
+h1{text-align:center;font-size:32px}
+h1 span{color:#818cf8}
+p{color:#aab5cc;line-height:1.6;text-align:center}
+.card{background:#111a2e;border:1px solid #354361;border-radius:16px;padding:22px;margin-top:25px}
+label{display:block;margin:18px 0 8px}
+input,select{width:100%;padding:13px;border-radius:9px;border:1px solid #354361;background:#080d1c;color:white;font-size:15px}
+button{width:100%;margin-top:22px;padding:15px;border:0;border-radius:10px;background:#6366f1;color:white;font-size:16px;font-weight:bold}
+#status{overflow-wrap:anywhere;line-height:1.6}
+</style>
+</head>
+<body>
+<main>
+<h1>Web2<span>APK</span> Builder</h1>
+<p>Convert your website into an Android application.</p>
+<div class="card">
+<form id="buildForm">
+<label>Website URL</label>
+<input id="url" type="url" placeholder="https://example.com" required>
+<label>App Name</label>
+<input id="appName" placeholder="My App" required>
+<label>Package Name</label>
+<input id="packageName" value="com.example.myapp" required>
+<label>Build Mode</label>
+<select id="mode">
+<option value="auto">Automatic App</option>
+<option value="custom">Customized App</option>
+</select>
+<div id="customOptions" hidden>
+<label>Toolbar Color</label>
+<input id="toolbarColor" type="color" value="#6366f1">
+<label><input id="showToolbar" type="checkbox" checked style="width:auto"> Show toolbar</label>
+</div>
+<button type="submit">Build Android APK</button>
+</form>
+<div id="status"></div>
+</div>
+</main>
+<script>
+const mode=document.getElementById('mode');
+mode.addEventListener('change',()=>{
+ document.getElementById('customOptions').hidden=mode.value!=='custom';
+});
+document.getElementById('buildForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const status=document.getElementById('status');
+ const url=document.getElementById('url').value.trim();
+ const appName=document.getElementById('appName').value.trim();
+ const packageName=document.getElementById('packageName').value.trim();
+ if(!/^https?:\/\//i.test(url)){
+  status.textContent='Please enter a valid website URL.';
+  return;
+ }
+ if(!/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(packageName)){
+  status.textContent='Enter a valid package name, e.g. com.company.myapp';
+  return;
+ }
+ status.textContent='Connecting to build server...';
+ try{
+  const response=await fetch('/api/build',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({
+    url,appName,packageName,mode:mode.value,
+    toolbarColor:document.getElementById('toolbarColor').value,
+    showToolbar:document.getElementById('showToolbar').checked
+   })
+  });
+  const data=await response.json();
+  if(!response.ok) throw new Error(data.error||'Build request failed');
+  status.textContent=data.message||'Build request submitted. Check build status with your server API.';
+ }catch(err){
+  status.textContent='Build failed: '+err.message+'. Please check your backend configuration.';
+ }
+});
+</script>
+</body>
+</html>
