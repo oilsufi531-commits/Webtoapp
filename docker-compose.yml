@@ -1,0 +1,14 @@
+services:
+  build-worker:
+    build: .
+    image: android-build-worker:1.0.0
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - build-data:/var/lib/androidbuildworker
+    restart: unless-stopped
+
+volumes:
+  build-data:

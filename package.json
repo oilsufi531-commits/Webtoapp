@@ -1,0 +1,13 @@
+{
+  "name": "android-build-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real Android build worker: Gradle, signing and APK verification for the Web to Android App Builder.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
